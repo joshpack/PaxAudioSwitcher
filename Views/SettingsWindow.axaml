@@ -1,0 +1,150 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="PaxAudioSwitcher.Views.SettingsWindow"
+        Title="PAX Audio Switcher"
+        Width="560" Height="740" MinWidth="460" MinHeight="520"
+        WindowStartupLocation="CenterScreen">
+
+  <Grid RowDefinitions="Auto,*" Margin="22,20,22,16">
+
+    <!-- Header -->
+    <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,10">
+      <Border Width="38" Height="38" CornerRadius="10" BoxShadow="0 0 18 0 #6600C8FF, 0 0 30 3 #3319F58C">
+        <Border.Background>
+          <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+            <GradientStop Color="#00C8FF" Offset="0" />
+            <GradientStop Color="#19F58C" Offset="1" />
+          </LinearGradientBrush>
+        </Border.Background>
+        <Viewbox Margin="7">
+          <Grid Width="100" Height="100">
+            <Path x:Name="SpeakerArt" Fill="#04140C" />
+            <Path x:Name="WavesArt" Stroke="#04140C" StrokeThickness="10" StrokeLineCap="Round" />
+          </Grid>
+        </Viewbox>
+      </Border>
+      <TextBlock Grid.Column="1" Text="PAX Audio Switcher" FontSize="18" FontWeight="Bold" Classes="neon"
+                 VerticalAlignment="Center" Margin="12,0,0,0" />
+      <Border x:Name="StatusPill" Grid.Column="2" CornerRadius="999" Padding="11,5" VerticalAlignment="Center"
+              Background="#0C2A1D" BorderBrush="#146B44" BorderThickness="1">
+        <StackPanel Orientation="Horizontal" Spacing="7">
+          <Ellipse x:Name="StatusDot" Width="8" Height="8" Fill="#19F58C" VerticalAlignment="Center" Classes="pulse" />
+          <TextBlock x:Name="StatusText" Text="Hotkeys ready" FontWeight="SemiBold" FontSize="12" />
+        </StackPanel>
+      </Border>
+    </Grid>
+
+    <TabControl x:Name="Tabs" Grid.Row="1" Padding="0,10,0,0">
+
+      <TabItem Header="Devices">
+        <ScrollViewer>
+          <StackPanel Spacing="12" Margin="0,0,12,6">
+
+            <Border x:Name="ConflictCard" Classes="card" IsVisible="False" Background="#2A2210" BorderBrush="#7A5A1A" Padding="14">
+              <TextBlock x:Name="ConflictText" TextWrapping="Wrap" Foreground="#F5C97A" FontSize="12" />
+            </Border>
+
+            <Border Classes="card" Padding="16">
+              <StackPanel Spacing="10">
+                <Grid ColumnDefinitions="*,Auto">
+                  <StackPanel Spacing="1" VerticalAlignment="Center">
+                    <TextBlock Text="PLAYBACK" Classes="label" />
+                    <TextBlock Text="Hotkey moves to the next ticked device" Classes="muted" FontSize="11" />
+                  </StackPanel>
+                  <ContentControl x:Name="PlaybackHotkeySlot" Grid.Column="1" />
+                </Grid>
+                <StackPanel x:Name="PlaybackList" Spacing="4" />
+              </StackPanel>
+            </Border>
+
+            <Border Classes="card" Padding="16">
+              <StackPanel Spacing="10">
+                <Grid ColumnDefinitions="*,Auto">
+                  <StackPanel Spacing="1" VerticalAlignment="Center">
+                    <TextBlock Text="RECORDING" Classes="label" />
+                    <TextBlock Text="Hotkey moves to the next ticked microphone" Classes="muted" FontSize="11" />
+                  </StackPanel>
+                  <ContentControl x:Name="RecordingHotkeySlot" Grid.Column="1" />
+                </Grid>
+                <StackPanel x:Name="RecordingList" Spacing="4" />
+                <Border Height="1" Background="{StaticResource BorderBrush2}" Margin="0,4" />
+                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                  <StackPanel Spacing="1" VerticalAlignment="Center">
+                    <TextBlock Text="Mute microphone" />
+                    <TextBlock x:Name="MuteState" Classes="muted" FontSize="11" />
+                  </StackPanel>
+                  <Button x:Name="MuteButton" Grid.Column="1" MinHeight="34" Padding="12,4" />
+                  <ContentControl x:Name="MuteHotkeySlot" Grid.Column="2" />
+                </Grid>
+              </StackPanel>
+            </Border>
+
+            <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap" Margin="4,0"
+                       Text="With nothing ticked, the hotkey goes through every device that is plugged in. Unplugged devices are skipped and remembered." />
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <TabItem Header="Profiles">
+        <ScrollViewer>
+          <StackPanel Spacing="12" Margin="0,0,12,6">
+            <Border Classes="card" Padding="16">
+              <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap" VerticalAlignment="Center"
+                           Text="A profile switches speakers and microphone together, from its own hotkey, the tray menu, or by itself when one of its programs comes to the front." />
+                <Button x:Name="AddProfileButton" Grid.Column="1" Content="+  New profile" Classes="primary" />
+              </Grid>
+            </Border>
+            <StackPanel x:Name="ProfileList" Spacing="12" />
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <TabItem Header="Settings">
+        <ScrollViewer>
+          <StackPanel Spacing="12" Margin="0,0,12,6">
+            <Border Classes="card" Padding="16">
+              <StackPanel Spacing="14">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                  <StackPanel Spacing="1" VerticalAlignment="Center">
+                    <TextBlock Text="After switching" />
+                    <TextBlock Text="The sound plays on the new device" Classes="muted" FontSize="11" />
+                  </StackPanel>
+                  <ComboBox x:Name="NotifyBox" Grid.Column="1" Width="190" MinHeight="34">
+                    <ComboBoxItem Content="Show a banner" />
+                    <ComboBoxItem Content="Banner and a sound" />
+                    <ComboBoxItem Content="Play a sound" />
+                    <ComboBoxItem Content="Nothing" />
+                  </ComboBox>
+                </Grid>
+                <Grid ColumnDefinitions="*,Auto">
+                  <StackPanel Spacing="1" VerticalAlignment="Center">
+                    <TextBlock Text="Switch the communications device too" />
+                    <TextBlock Text="Turn off to keep calls (Discord, Teams…) on the same headset whatever you switch" Classes="muted" FontSize="11" TextWrapping="Wrap" />
+                  </StackPanel>
+                  <ToggleSwitch x:Name="CommsSwitch" Grid.Column="1" OnContent="" OffContent="" />
+                </Grid>
+                <Grid ColumnDefinitions="*,Auto">
+                  <StackPanel Spacing="1" VerticalAlignment="Center">
+                    <TextBlock Text="Start when I sign in" />
+                    <TextBlock x:Name="AutostartNote" Text="Runs quietly in the tray" Classes="muted" FontSize="11" TextWrapping="Wrap" />
+                  </StackPanel>
+                  <ToggleSwitch x:Name="AutostartSwitch" Grid.Column="1" OnContent="" OffContent="" />
+                </Grid>
+              </StackPanel>
+            </Border>
+
+            <Border Classes="card" Padding="16">
+              <StackPanel Spacing="8">
+                <TextBlock Text="COMMAND LINE" Classes="label" />
+                <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap"
+                           Text="For desktop shortcuts, Stream Deck buttons and scripts. Works whether or not the app is running." />
+                <TextBox x:Name="CliText" IsReadOnly="True" AcceptsReturn="True" TextWrapping="NoWrap" FontFamily="Consolas,monospace" FontSize="12" />
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+    </TabControl>
+  </Grid>
+</Window>
