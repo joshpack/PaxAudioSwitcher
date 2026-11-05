@@ -21,8 +21,18 @@ public static class Banner
     private static ShapePath _waves = null!;
     private static DispatcherTimer? _timer;
 
-    public static void Show(SwitchNotice notice, NotifyMode mode)
+    private static int _spot = 8;
+    private static bool _followMouse = true;
+
+    /// <summary>
+    /// Announces a switch the way the settings say. <paramref name="force"/> shows the banner (silently) whatever the
+    /// setting, for messages the user must see and for previewing the position.
+    /// </summary>
+    public static void Show(SwitchNotice notice, AppSettings settings, bool force = false)
     {
+        var mode = force ? NotifyMode.Banner : settings.Notify;
+        _spot = Math.Clamp(settings.BannerSpot, 0, 8);
+        _followMouse = settings.BannerFollowsMouse;
         if (mode == NotifyMode.Off)
             return;
         if (mode is NotifyMode.Sound or NotifyMode.BannerAndSound)
@@ -32,6 +42,7 @@ public static class Banner
             return;
 
         _window ??= Create();
+        _timer!.Interval = TimeSpan.FromSeconds(force ? 5 : 2.5);
         _label.Text = notice.Label;
         _text.Text = notice.Text;
         _frame.BorderBrush = new SolidColorBrush(Color.Parse(notice.Warning ? "#7A2A33" : "#1D5A47"));
@@ -112,20 +123,39 @@ public static class Banner
         },
     };
 
-    /// <summary>Bottom-right of the working area of the screen the mouse is on.</summary>
+    /// <summary>Puts the banner in the chosen ninth of the working area (taskbar excluded) of the chosen screen.</summary>
     private static void Place()
     {
         if (_window is null)
             return;
-        GetCursorPos(out var cursor);
-        var screen = _window.Screens.ScreenFromPoint(new PixelPoint(cursor.X, cursor.Y)) ?? _window.Screens.Primary;
+        Avalonia.Platform.Screen? screen = null;
+        if (_followMouse)
+        {
+            GetCursorPos(out var cursor);
+            screen = _window.Screens.ScreenFromPoint(new PixelPoint(cursor.X, cursor.Y));
+        }
+
+        screen ??= _window.Screens.Primary;
         if (screen is null)
             return;
         var area = screen.WorkingArea;
         var scale = screen.Scaling;
         var w = (int)((_window.Bounds.Width > 0 ? _window.Bounds.Width : 340) * scale);
         var h = (int)((_window.Bounds.Height > 0 ? _window.Bounds.Height : 90) * scale);
-        _window.Position = new PixelPoint(area.Right - w - (int)(8 * scale), area.Bottom - h - (int)(8 * scale));
+        var gap = (int)(8 * scale);
+        var x = (_spot % 3) switch
+        {
+            0 => area.X + gap,
+            1 => area.X + (area.Width - w) / 2,
+            _ => area.Right - w - gap,
+        };
+        var y = (_spot / 3) switch
+        {
+            0 => area.Y + gap,
+            1 => area.Y + (area.Height - h) / 2,
+            _ => area.Bottom - h - gap,
+        };
+        _window.Position = new PixelPoint(x, y);
     }
 
     [StructLayout(LayoutKind.Sequential)]

@@ -53,7 +53,7 @@ public partial class App : Application
             lifetime.ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
             _sw = new Switcher(interactive: true);
-            _sw.Notice += n => Banner.Show(n, _sw.Settings.Notify);
+            _sw.Notice += n => Banner.Show(n, _sw.Settings);
             _sw.DevicesChanged += UpdateTray;
             _sw.Start(a => Dispatcher.UIThread.Post(a));
 
@@ -66,12 +66,18 @@ public partial class App : Application
 
             _ = Task.Run(ListenForCommands);
 
-            // Started by hand: show the settings. Started at sign-in (--minimized): stay quietly in the tray, unless a
-            // hotkey couldn't be registered and the user needs to pick another.
-            if (!Program.StartMinimized || _sw.HotkeyConflicts.Count > 0)
+            // Started by hand: show the settings, unless the user chose to start in the tray. Started at sign-in
+            // (--minimized): stay quietly in the tray. Either way a blocked hotkey needs the user's attention.
+            var inTray = Program.StartMinimized || _sw.Settings.StartInTray;
+            if (!inTray || (_sw.HotkeyConflicts.Count > 0 && !_sw.Settings.StartInTray))
                 OpenSettings();
             else
+            {
+                if (_sw.HotkeyConflicts.Count > 0)
+                    // Asked to stay in the tray: say so in a banner instead of opening the window.
+                    Banner.Show(new SwitchNotice("HOTKEY BLOCKED", string.Join("\n", _sw.HotkeyConflicts) + "\nClick the tray icon to pick another", Warning: true), _sw.Settings, force: true);
                 DispatcherTimer.RunOnce(MemoryTrim.Trim, TimeSpan.FromSeconds(3));
+            }
         }
 
         base.OnFrameworkInitializationCompleted();

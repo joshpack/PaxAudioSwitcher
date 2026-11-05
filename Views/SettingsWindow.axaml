@@ -117,6 +117,27 @@
                     <ComboBoxItem Content="Nothing" />
                   </ComboBox>
                 </Grid>
+                <Grid x:Name="SpotRow" ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                  <StackPanel Spacing="8" VerticalAlignment="Center">
+                    <StackPanel Spacing="1">
+                      <TextBlock Text="Banner position" />
+                      <TextBlock Text="Click a spot on the screen; a preview shows there" Classes="muted" FontSize="11" TextWrapping="Wrap" />
+                    </StackPanel>
+                    <ComboBox x:Name="ScreenBox" MinHeight="34" HorizontalAlignment="Left" Width="210">
+                      <ComboBoxItem Content="Screen the mouse is on" />
+                      <ComboBoxItem Content="Main screen" />
+                    </ComboBox>
+                  </StackPanel>
+                  <!-- A little monitor: nine spots across its face -->
+                  <StackPanel Grid.Column="1" Spacing="0" HorizontalAlignment="Center">
+                    <Border Width="176" Height="104" CornerRadius="8" Padding="6" BorderThickness="2"
+                            BorderBrush="#2B3242" Background="{StaticResource BgBrush}">
+                      <UniformGrid x:Name="SpotGrid" Rows="3" Columns="3" />
+                    </Border>
+                    <Border Width="34" Height="8" Background="#2B3242" HorizontalAlignment="Center" />
+                    <Border Width="70" Height="4" CornerRadius="2" Background="#2B3242" HorizontalAlignment="Center" />
+                  </StackPanel>
+                </Grid>
                 <Grid ColumnDefinitions="*,Auto">
                   <StackPanel Spacing="1" VerticalAlignment="Center">
                     <TextBlock Text="Switch the communications device too" />
@@ -130,6 +151,13 @@
                     <TextBlock x:Name="AutostartNote" Text="Runs quietly in the tray" Classes="muted" FontSize="11" TextWrapping="Wrap" />
                   </StackPanel>
                   <ToggleSwitch x:Name="AutostartSwitch" Grid.Column="1" OnContent="" OffContent="" />
+                </Grid>
+                <Grid ColumnDefinitions="*,Auto">
+                  <StackPanel Spacing="1" VerticalAlignment="Center">
+                    <TextBlock Text="Start minimized to the tray" />
+                    <TextBlock Text="Also when you open it yourself; click the tray icon for this window" Classes="muted" FontSize="11" TextWrapping="Wrap" />
+                  </StackPanel>
+                  <ToggleSwitch x:Name="TrayStartSwitch" Grid.Column="1" OnContent="" OffContent="" />
                 </Grid>
               </StackPanel>
             </Border>

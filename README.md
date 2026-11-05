@@ -13,7 +13,9 @@
 - **Pick any device directly** with its **Use** button, or from the tray menu.
 - **Profiles.** A playback and microphone pair (either side can be "leave as it is") with its own hotkey.
 - **Follow programs.** List programs in a profile (`game.exe`, `discord.exe`…). When one of their windows comes to the front, the profile switches in; with *Switch back when it closes*, your previous devices come back once every listed program has closed.
-- **Feedback** after each switch: a small banner in the bottom-right corner that never steals focus, a sound played on the new device, both, or nothing.
+- **Feedback** after each switch: a small banner that never steals focus, a sound played on the new device, both, or nothing.
+- **Banner where you want it.** Click one of nine spots on a little monitor in Settings (corners, edge middles or the center) and a preview shows there. It can follow the screen your mouse is on or stay on the main screen.
+- **Start minimized** to the tray, also when you open the app yourself.
 - **Communications device** can switch along with the default one, or stay put so calls keep using the same headset.
 - **Command line** for desktop shortcuts, Stream Deck buttons and scripts. Works whether the app is running or not.
 - **Hotkey clash warning** when another program already owns a combination.
@@ -22,7 +24,7 @@
 
 | Profiles | Settings |
 | --- | --- |
-| <img src="docs/screenshots/profiles.png" width="420" alt="Profiles tab: a Gaming profile with headset and headset microphone, the hotkey Ctrl+Alt+G, and game.exe and launcher.exe as programs that switch it in"> | <img src="docs/screenshots/settings.png" width="420" alt="Settings tab: what happens after switching, the communications device switch, start at sign-in, and the command-line examples"> |
+| <img src="docs/screenshots/profiles.png" width="420" alt="Profiles tab: a Gaming profile with headset and headset microphone, the hotkey Ctrl+Alt+G, and game.exe and launcher.exe as programs that switch it in"> | <img src="docs/screenshots/settings.png" width="420" alt="Settings tab: what happens after switching, the banner position picker drawn as a small monitor with nine spots, the communications device switch, start at sign-in, start minimized, and the command-line examples"> |
 
 The banner after a switch, a profile and a mute:
 
@@ -52,7 +54,7 @@ It was written from scratch and shares no code with other audio switchers.
 ## Install (Windows)
 
 1. Install the **[.NET 10 Runtime](https://dotnet.microsoft.com/download/dotnet/10.0)** (x64) if you don't have it. The plain ".NET Runtime" is enough; the ".NET Desktop Runtime" includes it, so that works too.
-2. Download **`PaxAudioSwitcher-1.0.0-win-x64.zip`** from **[the latest release](https://github.com/joshpack/PaxAudioSwitcher/releases/latest)** (and `PaxAudioSwitcher-1.0.0-win-x64.zip.sha256` if you want to check it: `Get-FileHash PaxAudioSwitcher-1.0.0-win-x64.zip` in PowerShell).
+2. Download **`PaxAudioSwitcher-1.1.0-win-x64.zip`** from **[the latest release](https://github.com/joshpack/PaxAudioSwitcher/releases/latest)** (and `PaxAudioSwitcher-1.1.0-win-x64.zip.sha256` if you want to check it: `Get-FileHash PaxAudioSwitcher-1.1.0-win-x64.zip` in PowerShell).
 3. Unzip it somewhere permanent, for example `%USERPROFILE%\Apps\PaxAudioSwitcher`.
 4. Run `PaxAudioSwitcher.exe`. It doesn't need administrator rights.
 
@@ -67,6 +69,8 @@ The exe isn't code-signed, so SmartScreen may warn the first time: choose **More
 - To change a hotkey, click it and press the new combination. <kbd>Esc</kbd> cancels, <kbd>Backspace</kbd> removes the hotkey. Your other hotkeys are paused while you do this.
 - If the status in the top-right corner says **hotkey blocked**, another program owns that combination; pick a different one.
 - Switch on **Start when I sign in** (Settings tab) to start with Windows. It then starts quietly in the tray and only opens the window when a hotkey couldn't be registered. This adds the value `PaxAudioSwitcher` under `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`.
+- Switch on **Start minimized to the tray** to keep the window closed even when you start the app yourself. If a hotkey is blocked, a banner says so instead of the window opening.
+- Under **Banner position**, click where on the screen the banner should appear. A preview pops up there.
 
 ## Hotkeys
 
@@ -103,7 +107,7 @@ Options can be combined. When the app is already running they are passed to it; 
 
 ## Settings file
 
-Everything is saved as JSON in `%APPDATA%\PaxAudioSwitcher\settings.json`: the hotkeys, which devices are in each cycle (`PlaybackCycle`, `RecordingCycle`; empty means all), `SetCommunications`, `Notify` (`Banner`, `BannerAndSound`, `Sound` or `Off`), the profiles, and the last-known name of every device (so a profile can still name a device that is unplugged). Delete the file to go back to the defaults.
+Everything is saved as JSON in `%APPDATA%\PaxAudioSwitcher\settings.json`: the hotkeys, which devices are in each cycle (`PlaybackCycle`, `RecordingCycle`; empty means all), `SetCommunications`, `Notify` (`Banner`, `BannerAndSound`, `Sound` or `Off`), `BannerSpot` (0 to 8, left to right and top to bottom; 8 is bottom right), `BannerFollowsMouse`, `StartInTray`, the profiles, and the last-known name of every device (so a profile can still name a device that is unplugged). Delete the file to go back to the defaults.
 
 ## Self-test
 

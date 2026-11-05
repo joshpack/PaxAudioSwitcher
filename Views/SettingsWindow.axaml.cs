@@ -460,6 +460,26 @@ public partial class SettingsWindow : Window
             }
         };
 
+        var tray = Ctl<ToggleSwitch>("TrayStartSwitch");
+        tray.IsChecked = S.StartInTray;
+        tray.IsCheckedChanged += (_, _) =>
+        {
+            S.StartInTray = tray.IsChecked == true;
+            S.Save();
+        };
+
+        var screen = Ctl<ComboBox>("ScreenBox");
+        screen.SelectedIndex = S.BannerFollowsMouse ? 0 : 1;
+        screen.SelectionChanged += (_, _) =>
+        {
+            if (_loading || screen.SelectedIndex < 0)
+                return;
+            S.BannerFollowsMouse = screen.SelectedIndex == 0;
+            S.Save();
+            PreviewBanner();
+        };
+        BuildSpots();
+
         var exe = Environment.ProcessPath ?? "PaxAudioSwitcher.exe";
         Ctl<TextBox>("CliText").Text =
             $"\"{exe}\" --next-playback\n" +
@@ -468,4 +488,39 @@ public partial class SettingsWindow : Window
             "  --playback \"Headphones\"   --recording \"Yeti\"   (part of a name)";
         _loading = false;
     }
+
+    private static readonly string[] SpotNames =
+        ["Top left", "Top middle", "Top right", "Middle left", "Center", "Middle right", "Bottom left", "Bottom middle", "Bottom right"];
+
+    /// <summary>The nine spots on the little monitor; the chosen one is lit like a tiny banner.</summary>
+    private void BuildSpots()
+    {
+        var grid = Ctl<Avalonia.Controls.Primitives.UniformGrid>("SpotGrid");
+        grid.Children.Clear();
+        for (var i = 0; i < 9; i++)
+        {
+            var spot = i;
+            var on = spot == S.BannerSpot;
+            var button = new Button
+            {
+                Width = 40, Height = 20, MinHeight = 0, Padding = new Thickness(0), CornerRadius = new CornerRadius(4),
+                HorizontalAlignment = (spot % 3) switch { 0 => HorizontalAlignment.Left, 1 => HorizontalAlignment.Center, _ => HorizontalAlignment.Right },
+                VerticalAlignment = (spot / 3) switch { 0 => VerticalAlignment.Top, 1 => VerticalAlignment.Center, _ => VerticalAlignment.Bottom },
+                Background = on ? new SolidColorBrush(Color.Parse("#19F58C")) : new SolidColorBrush(Color.Parse("#1D212C")),
+                BorderBrush = on ? Brushes.Transparent : new SolidColorBrush(Color.Parse("#2B3242")),
+            };
+            ToolTip.SetTip(button, SpotNames[spot]);
+            button.Click += (_, _) =>
+            {
+                S.BannerSpot = spot;
+                S.Save();
+                BuildSpots();
+                PreviewBanner();
+            };
+            grid.Children.Add(button);
+        }
+    }
+
+    private void PreviewBanner() =>
+        Banner.Show(new SwitchNotice("PREVIEW · " + SpotNames[Math.Clamp(S.BannerSpot, 0, 8)].ToUpperInvariant(), "Banners will show up here"), S, force: true);
 }

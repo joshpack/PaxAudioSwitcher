@@ -41,6 +41,15 @@ public sealed class AppSettings
 
     public NotifyMode Notify { get; set; } = NotifyMode.Banner;
 
+    /// <summary>Where the banner appears: 0–8 across a 3×3 grid of the screen, left to right, top to bottom (8 = bottom right).</summary>
+    public int BannerSpot { get; set; } = 8;
+
+    /// <summary>Banner on the screen the mouse is on (true) or always on the main screen.</summary>
+    public bool BannerFollowsMouse { get; set; } = true;
+
+    /// <summary>Start in the tray even when opened by hand, instead of showing this window.</summary>
+    public bool StartInTray { get; set; }
+
     public List<Profile> Profiles { get; set; } = new();
 
     /// <summary>Last known name of every device seen, so unplugged devices in a profile still have a name.</summary>
