@@ -56,7 +56,7 @@ It was written from scratch and shares no code with other audio switchers.
 ## Install (Windows)
 
 1. Install the **[.NET 10 Runtime](https://dotnet.microsoft.com/download/dotnet/10.0)** (x64) if you don't have it. The plain ".NET Runtime" is enough; the ".NET Desktop Runtime" includes it, so that works too.
-2. Download **`PaxAudioSwitcher-1.1.0-win-x64.zip`** from **[the latest release](https://github.com/joshpack/PaxAudioSwitcher/releases/latest)** (and `PaxAudioSwitcher-1.1.0-win-x64.zip.sha256` if you want to check it: `Get-FileHash PaxAudioSwitcher-1.1.0-win-x64.zip` in PowerShell).
+2. Download **`PaxAudioSwitcher-1.2.0-win-x64.zip`** from **[the latest release](https://github.com/joshpack/PaxAudioSwitcher/releases/latest)** (and `PaxAudioSwitcher-1.2.0-win-x64.zip.sha256` if you want to check it: `Get-FileHash PaxAudioSwitcher-1.2.0-win-x64.zip` in PowerShell).
 3. Unzip it somewhere permanent, for example `%USERPROFILE%\Apps\PaxAudioSwitcher`.
 4. Run `PaxAudioSwitcher.exe`. It doesn't need administrator rights.
 
