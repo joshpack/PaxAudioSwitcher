@@ -140,6 +140,20 @@
                 </Grid>
                 <Grid ColumnDefinitions="*,Auto">
                   <StackPanel Spacing="1" VerticalAlignment="Center">
+                    <TextBlock Text="Take apps with their own device along" />
+                    <TextBlock Text="Apps set to a device in Windows' Volume mixer ignore the default. With this on, a switch clears their own device so they follow it" Classes="muted" FontSize="11" TextWrapping="Wrap" />
+                  </StackPanel>
+                  <ToggleSwitch x:Name="MoveAppsSwitch" Grid.Column="1" OnContent="" OffContent="" VerticalAlignment="Center" />
+                </Grid>
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                  <StackPanel Spacing="1" VerticalAlignment="Center">
+                    <TextBlock Text="Let every app follow the default" />
+                    <TextBlock x:Name="ReleaseAllNote" Text="Clears the own output and input device of every app, including games that aren't running" Classes="muted" FontSize="11" TextWrapping="Wrap" />
+                  </StackPanel>
+                  <Button x:Name="ReleaseAllButton" Grid.Column="1" Content="Reset all apps" VerticalAlignment="Center" />
+                </Grid>
+                <Grid ColumnDefinitions="*,Auto">
+                  <StackPanel Spacing="1" VerticalAlignment="Center">
                     <TextBlock Text="Switch the communications device too" />
                     <TextBlock Text="Turn off to keep calls (Discord, Teams…) on the same headset whatever you switch" Classes="muted" FontSize="11" TextWrapping="Wrap" />
                   </StackPanel>

@@ -39,6 +39,12 @@ public sealed class AppSettings
     /// <summary>Also make the new device the one calls (Discord, Teams…) use. Off keeps a fixed headset for calls.</summary>
     public bool SetCommunications { get; set; } = true;
 
+    /// <summary>
+    /// Take along apps that were given their own device in Windows' Volume mixer (they ignore the default otherwise):
+    /// their own device is cleared so they follow the new default.
+    /// </summary>
+    public bool MoveAppsWithOwnDevice { get; set; } = true;
+
     public NotifyMode Notify { get; set; } = NotifyMode.Banner;
 
     /// <summary>Where the banner appears: 0–8 across a 3×3 grid of the screen, left to right, top to bottom (8 = bottom right).</summary>

@@ -460,6 +460,18 @@ public partial class SettingsWindow : Window
             }
         };
 
+        var moveApps = Ctl<ToggleSwitch>("MoveAppsSwitch");
+        moveApps.IsChecked = S.MoveAppsWithOwnDevice;
+        moveApps.IsCheckedChanged += (_, _) =>
+        {
+            S.MoveAppsWithOwnDevice = moveApps.IsChecked == true;
+            S.Save();
+        };
+        Ctl<Button>("ReleaseAllButton").Click += (_, _) =>
+            Ctl<TextBlock>("ReleaseAllNote").Text = AppRouting.ReleaseAllApps()
+                ? "Done: every app now follows the default devices"
+                : "This version of Windows doesn't allow that; use Reset in Settings → System → Sound → Volume mixer";
+
         var tray = Ctl<ToggleSwitch>("TrayStartSwitch");
         tray.IsChecked = S.StartInTray;
         tray.IsCheckedChanged += (_, _) =>

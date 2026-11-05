@@ -37,6 +37,22 @@ internal static class SelfTest
 
         r.AppendLine($"Mic muted: {sw.Audio.IsMicMuted()?.ToString() ?? "no mic"}");
 
+        // Apps given their own device in the Volume mixer (read only: nothing is changed here).
+        var pinned = new SortedSet<string>();
+        var scan = System.Diagnostics.Stopwatch.StartNew();
+        foreach (var proc in System.Diagnostics.Process.GetProcesses())
+        {
+            using (proc)
+            {
+                if (AppRouting.OwnDevice((uint)proc.Id, EDataFlow.Render) is { } own)
+                    pinned.Add($"{proc.ProcessName} -> {own}");
+            }
+        }
+
+        r.AppendLine($"Running apps with their own output device: {pinned.Count} (scan took {scan.ElapsedMilliseconds} ms)");
+        foreach (var p in pinned)
+            r.AppendLine("  - " + p);
+
         using var hk = new HotkeyManager();
         var probe = new Hotkey(Hotkey.Ctrl | Hotkey.Alt | Hotkey.Shift | Hotkey.Win, 0x87);   // F24: nobody uses it
         r.AppendLine($"Hotkey register (Ctrl+Alt+Shift+Win+F24): {(hk.Register(probe, () => { }) ? "OK" : "FAILED")}");

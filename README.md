@@ -16,6 +16,7 @@
 - **Feedback** after each switch: a small banner that never steals focus, a sound played on the new device, both, or nothing.
 - **Banner where you want it.** Click one of nine spots on a little monitor in Settings (corners, edge middles or the center) and a preview shows there. It can follow the screen your mouse is on or stay on the main screen.
 - **Start minimized** to the tray, also when you open the app yourself.
+- **Apps with their own device come along.** An app given its own output in Windows' Volume mixer (*Settings → System → Sound → Volume mixer*) ignores the default device, so switching normally leaves it behind. PAX clears that app's own device when you switch, so it follows; turn this off in Settings to keep such apps where they are. *Reset all apps* clears every app's own device at once, including games that aren't running.
 - **Communications device** can switch along with the default one, or stay put so calls keep using the same headset.
 - **Command line** for desktop shortcuts, Stream Deck buttons and scripts. Works whether the app is running or not.
 - **Hotkey clash warning** when another program already owns a combination.
@@ -36,6 +37,7 @@ The banner after a switch, a profile and a mute:
 
 - **Devices.** The Windows Core Audio API (`IMMDeviceEnumerator`) lists playback and recording devices and reports when one is plugged in, removed or changed.
 - **Switching.** The default device is set through `IPolicyConfig`, the interface Windows' own Sound control panel uses. It isn't officially documented, so a future Windows update could change it. Each switch sets the *Console* and *Multimedia* roles, and *Communications* too unless you turn that off.
+- **Apps with their own device.** The Volume mixer's per-app devices are read and cleared through Windows' internal `AudioPolicyConfig` factory (Windows 10 21H2 and later), the same one the mixer page uses. It isn't documented either. Only running apps that actually have their own device are touched, and the scan takes a few milliseconds.
 - **Hotkeys** are registered with `RegisterHotKey` on a hidden message-only window: no keyboard hook, nothing reads your typing.
 - **Programs.** Profiles that follow programs use an out-of-context WinEvent hook for "foreground window changed", so nothing is injected into other programs and nothing polls. The watcher only runs while some profile has programs listed.
 - **Command line.** A second copy started with options hands them to the running copy over a named pipe and exits. If no copy is running, it does the job itself and exits.
@@ -107,7 +109,7 @@ Options can be combined. When the app is already running they are passed to it; 
 
 ## Settings file
 
-Everything is saved as JSON in `%APPDATA%\PaxAudioSwitcher\settings.json`: the hotkeys, which devices are in each cycle (`PlaybackCycle`, `RecordingCycle`; empty means all), `SetCommunications`, `Notify` (`Banner`, `BannerAndSound`, `Sound` or `Off`), `BannerSpot` (0 to 8, left to right and top to bottom; 8 is bottom right), `BannerFollowsMouse`, `StartInTray`, the profiles, and the last-known name of every device (so a profile can still name a device that is unplugged). Delete the file to go back to the defaults.
+Everything is saved as JSON in `%APPDATA%\PaxAudioSwitcher\settings.json`: the hotkeys, which devices are in each cycle (`PlaybackCycle`, `RecordingCycle`; empty means all), `MoveAppsWithOwnDevice`, `SetCommunications`, `Notify` (`Banner`, `BannerAndSound`, `Sound` or `Off`), `BannerSpot` (0 to 8, left to right and top to bottom; 8 is bottom right), `BannerFollowsMouse`, `StartInTray`, the profiles, and the last-known name of every device (so a profile can still name a device that is unplugged). Delete the file to go back to the defaults.
 
 ## Self-test
 
@@ -115,7 +117,7 @@ Everything is saved as JSON in `%APPDATA%\PaxAudioSwitcher\settings.json`: the h
 PaxAudioSwitcher.exe --self-test C:\Temp\pax-test
 ```
 
-Writes `report.txt` into that folder: the devices it found, whether re-applying the current defaults works (the defaults are set to what they already are, so nothing audibly changes), and which hotkeys are free. It also saves `tab0.png` to `tab2.png`, pictures of the settings window drawn off-screen, so nothing appears on your screen. The report and pictures contain your real device names.
+Writes `report.txt` into that folder: the devices it found, whether re-applying the current defaults works (the defaults are set to what they already are, so nothing audibly changes), which running apps have their own output device (read only), and which hotkeys are free. It also saves `tab0.png` to `tab2.png`, pictures of the settings window drawn off-screen, so nothing appears on your screen. The report and pictures contain your real device names.
 
 ## Uninstall
 
@@ -143,6 +145,7 @@ The version comes from `<Version>` in `PaxAudioSwitcher.csproj`. For a copy that
 | `Program.cs` | Start-up, single instance, forwarding options to the running copy, the command-line actions |
 | `App.axaml(.cs)` | Theme, tray icon and menu, listening for forwarded commands |
 | `Audio/CoreAudio.cs` | Core Audio and `IPolicyConfig` COM interop |
+| `Audio/AppRouting.cs` | Apps given their own device in the Volume mixer |
 | `Audio/AudioDevices.cs` | Listing devices, reading and setting defaults, microphone mute, change notifications |
 | `Platform/Hotkeys.cs` | Global hotkeys on a message-only window |
 | `Platform/ForegroundWatcher.cs` | Which program's window is in front |

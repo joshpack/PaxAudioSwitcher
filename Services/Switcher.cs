@@ -118,11 +118,34 @@ public sealed class Switcher : IDisposable
 
     public bool SwitchTo(AudioDevice device)
     {
-        var ok = Audio.SetDefault(device.Id, Settings.SetCommunications);
+        var ok = SetDefault(device.Id, device.Flow, out var moved);
         var label = device.Flow == EDataFlow.Render ? "PLAYBACK" : "RECORDING";
-        Notice?.Invoke(ok ? new SwitchNotice(label, device.FullName) : new SwitchNotice(label, "Windows refused to switch to " + device.FullName, Warning: true));
+        Notice?.Invoke(ok
+            ? new SwitchNotice(label, device.FullName + MovedNote(moved))
+            : new SwitchNotice(label, "Windows refused to switch to " + device.FullName, Warning: true));
         return ok;
     }
+
+    /// <summary>
+    /// Makes a device the default and, when the setting is on, takes along the running apps that were given their own
+    /// device in Windows' Volume mixer (they ignore the default otherwise). <paramref name="moved"/> counts those apps.
+    /// </summary>
+    private bool SetDefault(string id, EDataFlow flow, out int moved)
+    {
+        moved = 0;
+        if (!Audio.SetDefault(id, Settings.SetCommunications))
+            return false;
+        if (Settings.MoveAppsWithOwnDevice)
+            moved = Math.Max(0, AppRouting.ReleaseRunningApps(flow));
+        return true;
+    }
+
+    private static string MovedNote(int moved) => moved switch
+    {
+        0 => "",
+        1 => "\n1 app with its own device moved along",
+        _ => $"\n{moved} apps with their own device moved along",
+    };
 
     public bool SwitchTo(string id, EDataFlow flow)
     {
@@ -161,14 +184,14 @@ public sealed class Switcher : IDisposable
             if (id is null || Audio.GetDefault(flow)?.Id == id)
                 continue;
             var device = Audio.List(flow).FirstOrDefault(d => d.Id == id);
-            if (device is null || !Audio.SetDefault(id, Settings.SetCommunications))
+            if (device is null || !SetDefault(id, flow, out var moved))
             {
                 ok = false;
                 changed.Add(Settings.NameOf(id) + " (not plugged in)");
                 continue;
             }
 
-            changed.Add(device.FullName);
+            changed.Add(device.FullName + MovedNote(moved));
         }
 
         if (changed.Count > 0 || !quietIfNothingChanged)
