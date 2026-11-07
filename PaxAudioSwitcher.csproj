@@ -9,6 +9,7 @@
     <AssemblyName>PaxAudioSwitcher</AssemblyName>
     <Version>1.2.0</Version>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon Condition="Exists('Assets\PaxAudioSwitcher.ico')">Assets\PaxAudioSwitcher.ico</ApplicationIcon>
     <!-- Keep memory low: no background GC thread, no profile-guided tiering, no ICU culture data. -->
     <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
     <TieredPGO>false</TieredPGO>

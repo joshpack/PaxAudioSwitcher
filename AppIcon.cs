@@ -18,38 +18,6 @@ public static class AppIcon
     /// <summary>A slash across the waves, for a muted microphone.</summary>
     public static readonly Geometry Slash = Geometry.Parse("M60,30 L92,70");
 
-    /// <summary>Renders the app icon (speaker on a rounded accent tile) for the tray and windows.</summary>
-    public static WindowIcon Create(int size = 64, bool muted = false)
-    {
-        var dark = new SolidColorBrush(Color.Parse("#04140C"));
-        var tile = new Grid { Width = size, Height = size };
-        tile.Children.Add(new Border
-        {
-            CornerRadius = new CornerRadius(size * 0.22),
-            Background = new LinearGradientBrush
-            {
-                StartPoint = new RelativePoint(0, 0, RelativeUnit.Relative),
-                EndPoint = new RelativePoint(1, 1, RelativeUnit.Relative),
-                GradientStops =
-                {
-                    new GradientStop(Color.Parse(muted ? "#FF7A6B" : "#00C8FF"), 0),
-                    new GradientStop(Color.Parse(muted ? "#F2666A" : "#19F58C"), 1),
-                },
-            },
-        });
-
-        var art = new Grid { Width = 100, Height = 100 };
-        art.Children.Add(new ShapePath { Data = Speaker, Fill = dark });
-        art.Children.Add(new ShapePath
-        {
-            Data = muted ? Slash : Waves, Stroke = dark, StrokeThickness = 10, StrokeLineCap = PenLineCap.Round,
-        });
-        tile.Children.Add(new Viewbox { Margin = new Thickness(size * 0.14), Child = art });
-
-        tile.Measure(new Size(size, size));
-        tile.Arrange(new Rect(0, 0, size, size));
-        var bitmap = new RenderTargetBitmap(new PixelSize(size, size), new Vector(96, 96));
-        bitmap.Render(tile);
-        return new WindowIcon(bitmap);
-    }
+    /// <summary>The app icon for the tray and windows (see <see cref="BrandIcon"/>).</summary>
+    public static WindowIcon Create(int size = 64, bool muted = false) => BrandIcon.Window(size, muted);
 }
