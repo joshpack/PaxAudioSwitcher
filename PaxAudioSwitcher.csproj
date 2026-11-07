@@ -7,7 +7,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>PaxAudioSwitcher</RootNamespace>
     <AssemblyName>PaxAudioSwitcher</AssemblyName>
-    <Version>1.2.0</Version>
+    <Version>1.2.1</Version>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon Condition="Exists('Assets\PaxAudioSwitcher.ico')">Assets\PaxAudioSwitcher.ico</ApplicationIcon>
     <!-- Keep memory low: no background GC thread, no profile-guided tiering, no ICU culture data. -->
