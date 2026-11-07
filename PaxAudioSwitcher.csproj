@@ -7,7 +7,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>PaxAudioSwitcher</RootNamespace>
     <AssemblyName>PaxAudioSwitcher</AssemblyName>
-    <Version>1.2.1</Version>
+    <Version>1.3.0</Version>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon Condition="Exists('Assets\PaxAudioSwitcher.ico')">Assets\PaxAudioSwitcher.ico</ApplicationIcon>
     <!-- Keep memory low: no background GC thread, no profile-guided tiering, no ICU culture data. -->
@@ -21,6 +21,8 @@
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="12.1.4" />
     <PackageReference Include="Avalonia.Desktop" Version="12.1.4" />
+    <!-- Self-test only: draws the windows with no OS window at all -->
+    <PackageReference Include="Avalonia.Headless" Version="12.1.4" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.4" />
   </ItemGroup>
 

@@ -1,5 +1,6 @@
 using System.IO.Pipes;
 using Avalonia;
+using Avalonia.Headless;
 using PaxAudioSwitcher.Audio;
 using PaxAudioSwitcher.Services;
 
@@ -16,13 +17,20 @@ internal static class Program
     [STAThread]
     public static int Main(string[] args)
     {
+        // PAX App Standard: window placement lives in windows.json next to settings.json.
+        PaxStandard.PaxChrome.Configure(TrayLink.AppId, AppSettings.Folder);
         StartMinimized = args.Any(a => a.Equals("--minimized", StringComparison.OrdinalIgnoreCase));
 
         var test = Array.FindIndex(args, a => a.Equals("--self-test", StringComparison.OrdinalIgnoreCase));
         if (test >= 0 && test + 1 < args.Length)
         {
             SelfTest.Dir = args[test + 1];
-            BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+            // Headless platform: no OS window is ever created, so nothing can flash up on screen.
+            AppBuilder.Configure<App>()
+                .UseSkia()
+                .UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false })
+                .LogToTrace()
+                .StartWithClassicDesktopLifetime(args);
             return 0;
         }
 

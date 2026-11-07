@@ -39,6 +39,13 @@ public sealed class Switcher : IDisposable
         Audio = new AudioDevices(watch: interactive);
     }
 
+    /// <summary>Self-test pictures: the given settings and made-up devices; no hotkeys, nothing watched or saved by itself.</summary>
+    public Switcher(AppSettings settings, SampleDevices sample)
+    {
+        Settings = settings;
+        Audio = new AudioDevices(sample);
+    }
+
     /// <summary>Starts hotkeys and watching. <paramref name="post"/> runs an action on the UI thread.</summary>
     public void Start(Action<Action> post)
     {

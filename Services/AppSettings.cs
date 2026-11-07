@@ -61,8 +61,11 @@ public sealed class AppSettings
     /// <summary>Last known name of every device seen, so unplugged devices in a profile still have a name.</summary>
     public Dictionary<string, string> KnownNames { get; set; } = new();
 
+    /// <summary>%APPDATA%\PaxAudioSwitcher, or the folder in PAXAS_DATA_DIR (tests).</summary>
     public static string Folder =>
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "PaxAudioSwitcher");
+        Environment.GetEnvironmentVariable("PAXAS_DATA_DIR") is { Length: > 0 } dir
+            ? dir
+            : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "PaxAudioSwitcher");
 
     private static string FilePath => Path.Combine(Folder, "settings.json");
 
@@ -81,8 +84,14 @@ public sealed class AppSettings
         return new AppSettings();
     }
 
+    /// <summary>Self-test: the window may be built and drawn, but nothing is ever written back.</summary>
+    [System.Text.Json.Serialization.JsonIgnore]
+    public bool ReadOnly { get; set; }
+
     public void Save()
     {
+        if (ReadOnly)
+            return;
         try
         {
             Directory.CreateDirectory(Folder);

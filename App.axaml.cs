@@ -8,6 +8,7 @@ using PaxAudioSwitcher.Audio;
 using PaxAudioSwitcher.Platform;
 using PaxAudioSwitcher.Services;
 using PaxAudioSwitcher.Views;
+using PaxStandard;
 
 namespace PaxAudioSwitcher;
 
@@ -19,9 +20,15 @@ public partial class App : Application
     private IClassicDesktopStyleApplicationLifetime _lifetime = null!;
     private WindowIcon? _icon, _mutedIcon;
     private bool? _shownMuted;
+    private TrayLink _trayLink = null!;
     private readonly CancellationTokenSource _quit = new();
 
-    public override void Initialize() => AvaloniaXamlLoader.Load(this);
+    public override void Initialize()
+    {
+        AvaloniaXamlLoader.Load(this);
+        // After the app's own styles, so the caption buttons' hover colours win over the general Button ones.
+        Styles.Add(PaxChrome.Styles());
+    }
 
     public override void OnFrameworkInitializationCompleted()
     {
@@ -34,9 +41,13 @@ public partial class App : Application
                 var report = new System.Text.StringBuilder();
                 try
                 {
+                    SelfTest.Prepare(report);
                     SelfTest.Audio(report);
-                    using var sw = new Switcher(interactive: false);
-                    SelfTest.Window(report, sw);
+                    using (var sw = new Switcher(interactive: false))
+                        SelfTest.Window(report, sw);
+                    SelfTest.Placement(report);
+                    SelfTest.TrayIconLink(report);
+                    SelfTest.SamplePictures(report);
                 }
                 catch (Exception ex)
                 {
@@ -59,9 +70,12 @@ public partial class App : Application
 
             _icon = AppIcon.Create();
             _mutedIcon = AppIcon.Create(muted: true);
-            _tray = new TrayIcon { Icon = _icon, ToolTipText = "PAX Audio Switcher" };
+            // PAX Toolkit (or the "Show tray icon" switch) can hide the icon; the app keeps running either way and
+            // starting the exe again opens the window.
+            _tray = new TrayIcon { Icon = _icon, ToolTipText = "PAX Audio Switcher", IsVisible = PaxLink.TrayIconVisible(TrayLink.AppId) };
             _tray.Clicked += (_, _) => OpenSettings();
             TrayIcon.SetIcons(this, new TrayIcons { _tray });
+            _trayLink = new TrayLink(v => _tray.IsVisible = v, a => Dispatcher.UIThread.Post(a));
             UpdateTray();
 
             _ = Task.Run(ListenForCommands);
@@ -75,7 +89,7 @@ public partial class App : Application
             {
                 if (_sw.HotkeyConflicts.Count > 0)
                     // Asked to stay in the tray: say so in a banner instead of opening the window.
-                    Banner.Show(new SwitchNotice("HOTKEY BLOCKED", string.Join("\n", _sw.HotkeyConflicts) + "\nClick the tray icon to pick another", Warning: true), _sw.Settings, force: true);
+                    Banner.Show(new SwitchNotice("HOTKEY BLOCKED", string.Join("\n", _sw.HotkeyConflicts) + (_trayLink.Visible ? "\nClick the tray icon to pick another" : "\nStart the app again to pick another"), Warning: true), _sw.Settings, force: true);
                 DispatcherTimer.RunOnce(MemoryTrim.Trim, TimeSpan.FromSeconds(3));
             }
         }
@@ -186,11 +200,13 @@ public partial class App : Application
     {
         if (_window is not null)
         {
+            if (_window.WindowState == WindowState.Minimized)
+                _window.WindowState = WindowState.Normal;
             _window.Activate();
             return;
         }
 
-        _window = new SettingsWindow(_sw, UpdateTray);
+        _window = new SettingsWindow(_sw, UpdateTray, _trayLink, Quit);
         _window.Closed += (_, _) =>
         {
             _window = null;
@@ -205,6 +221,7 @@ public partial class App : Application
     {
         _quit.Cancel();
         _window?.Close();
+        _trayLink.Dispose();
         _sw.Dispose();
         _tray.IsVisible = false;
         _tray.Dispose();

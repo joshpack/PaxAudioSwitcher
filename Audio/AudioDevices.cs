@@ -11,6 +11,9 @@ public sealed record AudioDevice(string Id, string Name, string Adapter, EDataFl
     public string FullName => Adapter.Length > 0 && !Name.Contains(Adapter, StringComparison.OrdinalIgnoreCase) ? $"{Name} ({Adapter})" : Name;
 }
 
+/// <summary>Made-up devices and defaults, for pictures of the window that show nothing of this PC.</summary>
+public sealed record SampleDevices(List<AudioDevice> Devices, string PlaybackId, string RecordingId, bool MicMuted = false);
+
 /// <summary>
 /// Lists audio devices, reads and changes the default ones, mutes the microphone and reports when anything about the
 /// devices changes. Must be created and used on one STA thread (the UI thread).
@@ -23,6 +26,9 @@ public sealed class AudioDevices : IDisposable
     /// <summary>Raised (on a Core Audio thread) when a device is added, removed, enabled, disabled or made default.</summary>
     public event Action? Changed;
 
+    /// <summary>Made-up devices for the README pictures (self-test only); null on every real run.</summary>
+    private readonly SampleDevices? _sample;
+
     public AudioDevices(bool watch = true)
     {
         _enumerator = (IMMDeviceEnumerator)new MMDeviceEnumeratorComObject();
@@ -33,9 +39,14 @@ public sealed class AudioDevices : IDisposable
         }
     }
 
+    /// <summary>Shows <paramref name="sample"/> instead of this PC's devices; changes nothing in Windows.</summary>
+    public AudioDevices(SampleDevices sample) : this(watch: false) => _sample = sample;
+
     /// <summary>The devices that are plugged in and enabled, in Windows' own order.</summary>
     public List<AudioDevice> List(EDataFlow flow)
     {
+        if (_sample is not null)
+            return _sample.Devices.Where(d => d.Flow == flow).ToList();
         var result = new List<AudioDevice>();
         if (_enumerator.EnumAudioEndpoints(flow, CoreAudioNative.DeviceStateActive, out var collection) != 0)
             return result;
@@ -68,6 +79,8 @@ public sealed class AudioDevices : IDisposable
     /// <summary>The device Windows currently plays to (or records from), or null when there is none.</summary>
     public AudioDevice? GetDefault(EDataFlow flow, ERole role = ERole.Multimedia)
     {
+        if (_sample is not null)
+            return _sample.Devices.FirstOrDefault(d => d.Id == (flow == EDataFlow.Render ? _sample.PlaybackId : _sample.RecordingId));
         if (_enumerator.GetDefaultAudioEndpoint(flow, role, out var device) != 0)
             return null;
         try
@@ -83,6 +96,8 @@ public sealed class AudioDevices : IDisposable
     /// <summary>Makes a device the default. With <paramref name="communications"/> it also becomes the device calls use.</summary>
     public bool SetDefault(string id, bool communications)
     {
+        if (_sample is not null)
+            return false;
         var policy = (IPolicyConfig)new PolicyConfigComObject();
         try
         {
@@ -101,6 +116,8 @@ public sealed class AudioDevices : IDisposable
     /// <summary>Mutes or unmutes the default recording device; null toggles. Returns the new state, or null without a microphone.</summary>
     public bool? SetMicMute(bool? mute)
     {
+        if (_sample is not null)
+            return null;
         var volume = DefaultMicVolume();
         if (volume is null)
             return null;
@@ -120,6 +137,8 @@ public sealed class AudioDevices : IDisposable
 
     public bool? IsMicMuted()
     {
+        if (_sample is not null)
+            return _sample.MicMuted;
         var volume = DefaultMicVolume();
         if (volume is null)
             return null;

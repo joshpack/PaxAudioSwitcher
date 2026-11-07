@@ -5,36 +5,10 @@
         Width="560" Height="740" MinWidth="460" MinHeight="520"
         WindowStartupLocation="CenterScreen">
 
-  <Grid RowDefinitions="Auto,*" Margin="22,20,22,16">
+  <!-- The PAX title bar (icon, name, the hotkey status and the caption buttons) is added in code: PaxChrome.Wrap -->
+  <Grid Margin="22,10,22,16">
 
-    <!-- Header -->
-    <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,10">
-      <Border Width="38" Height="38" CornerRadius="10" BoxShadow="0 0 18 0 #6600C8FF, 0 0 30 3 #3319F58C">
-        <Border.Background>
-          <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
-            <GradientStop Color="#00C8FF" Offset="0" />
-            <GradientStop Color="#19F58C" Offset="1" />
-          </LinearGradientBrush>
-        </Border.Background>
-        <Viewbox Margin="7">
-          <Grid Width="100" Height="100">
-            <Path x:Name="SpeakerArt" Fill="#04140C" />
-            <Path x:Name="WavesArt" Stroke="#04140C" StrokeThickness="10" StrokeLineCap="Round" />
-          </Grid>
-        </Viewbox>
-      </Border>
-      <TextBlock Grid.Column="1" Text="PAX Audio Switcher" FontSize="18" FontWeight="Bold" Classes="neon"
-                 VerticalAlignment="Center" Margin="12,0,0,0" />
-      <Border x:Name="StatusPill" Grid.Column="2" CornerRadius="999" Padding="11,5" VerticalAlignment="Center"
-              Background="#0C2A1D" BorderBrush="#146B44" BorderThickness="1">
-        <StackPanel Orientation="Horizontal" Spacing="7">
-          <Ellipse x:Name="StatusDot" Width="8" Height="8" Fill="#19F58C" VerticalAlignment="Center" Classes="pulse" />
-          <TextBlock x:Name="StatusText" Text="Hotkeys ready" FontWeight="SemiBold" FontSize="12" />
-        </StackPanel>
-      </Border>
-    </Grid>
-
-    <TabControl x:Name="Tabs" Grid.Row="1" Padding="0,10,0,0">
+    <TabControl x:Name="Tabs" Padding="0,10,0,0">
 
       <TabItem Header="Devices">
         <ScrollViewer>
@@ -172,6 +146,20 @@
                     <TextBlock Text="Also when you open it yourself; click the tray icon for this window" Classes="muted" FontSize="11" TextWrapping="Wrap" />
                   </StackPanel>
                   <ToggleSwitch x:Name="TrayStartSwitch" Grid.Column="1" OnContent="" OffContent="" />
+                </Grid>
+                <Grid ColumnDefinitions="*,Auto">
+                  <StackPanel Spacing="1" VerticalAlignment="Center">
+                    <TextBlock Text="Show tray icon" />
+                    <TextBlock Text="Also set from PAX Toolkit. Hidden, the hotkeys keep working; start the app again for this window" Classes="muted" FontSize="11" TextWrapping="Wrap" />
+                  </StackPanel>
+                  <ToggleSwitch x:Name="TrayIconSwitch" Grid.Column="1" OnContent="" OffContent="" />
+                </Grid>
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                  <StackPanel Spacing="1" VerticalAlignment="Center">
+                    <TextBlock Text="Quit PAX Audio Switcher" />
+                    <TextBlock Text="Closing this window keeps it running; this stops the hotkeys too" Classes="muted" FontSize="11" TextWrapping="Wrap" />
+                  </StackPanel>
+                  <Button x:Name="QuitButton" Grid.Column="1" Content="Quit" VerticalAlignment="Center" />
                 </Grid>
               </StackPanel>
             </Border>

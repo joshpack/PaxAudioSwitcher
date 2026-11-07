@@ -6,6 +6,7 @@ using Avalonia.Media;
 using PaxAudioSwitcher.Audio;
 using PaxAudioSwitcher.Platform;
 using PaxAudioSwitcher.Services;
+using PaxStandard;
 using Ellipse = Avalonia.Controls.Shapes.Ellipse;
 using ShapePath = Avalonia.Controls.Shapes.Path;
 
@@ -31,23 +32,76 @@ public partial class SettingsWindow : Window
         _menuChanged = null!;
     }
 
-    public SettingsWindow(Switcher sw, Action menuChanged)
+    /// <param name="tray">The tray icon's PAX Toolkit link, for the "Show tray icon" switch (null in the self-test).</param>
+    /// <param name="quit">Quits the whole app (the tray icon may be hidden, so the window needs its own way out).</param>
+    public SettingsWindow(Switcher sw, Action menuChanged, TrayLink? tray = null, Action? quit = null)
     {
         InitializeComponent();
         _sw = sw;
         _menuChanged = menuChanged;
         Icon = AppIcon.Create(128);
-        Ctl<ShapePath>("SpeakerArt").Data = AppIcon.Speaker;
-        Ctl<ShapePath>("WavesArt").Data = AppIcon.Waves;
+
+        // The PAX title bar: icon, name, the hotkey status, then minimize / maximize / close.
+        var content = (Control)Content!;
+        Content = null;
+        Content = PaxChrome.Wrap(this, content, "PAX Audio Switcher", BrandIcon.Render(36), resizable: true, extras: BuildStatusPill());
+        PaxChrome.RememberPlacement(this, PlacementKey);
 
         Ctl<ContentControl>("PlaybackHotkeySlot").Content = HotkeyEditor(S.PlaybackHotkey, v => S.PlaybackHotkey = v);
         Ctl<ContentControl>("RecordingHotkeySlot").Content = HotkeyEditor(S.RecordingHotkey, v => S.RecordingHotkey = v);
         Ctl<ContentControl>("MuteHotkeySlot").Content = HotkeyEditor(S.MuteHotkey, v => S.MuteHotkey = v);
         Ctl<Button>("MuteButton").Click += (_, _) => _sw.ToggleMute();
         Ctl<Button>("AddProfileButton").Click += (_, _) => AddProfile();
+        Ctl<Button>("QuitButton").Click += (_, _) => quit?.Invoke();
+
+        var trayIcon = Ctl<ToggleSwitch>("TrayIconSwitch");
+        trayIcon.IsChecked = tray?.Visible ?? PaxLink.TrayIconVisible(TrayLink.AppId);
+        trayIcon.IsCheckedChanged += (_, _) =>
+        {
+            if (_loading)
+                return;
+            if (tray is not null)
+                tray.Set(trayIcon.IsChecked == true);
+            else
+                PaxLink.SetTrayIconVisible(TrayLink.AppId, trayIcon.IsChecked == true);
+        };
+        if (tray is not null)
+        {
+            // Turned on or off from PAX Toolkit while this window is open: keep the switch in step.
+            void OnTrayChanged(bool visible)
+            {
+                _loading = true;
+                trayIcon.IsChecked = visible;
+                _loading = false;
+            }
+
+            tray.Changed += OnTrayChanged;
+            Closed += (_, _) => tray.Changed -= OnTrayChanged;
+        }
 
         LoadSettingsTab();
         Refresh();
+    }
+
+    /// <summary>Key of this window's size and position in windows.json.</summary>
+    public const string PlacementKey = "settings";
+
+    private Border _statusPill = null!;
+    private Ellipse _statusDot = null!;
+    private TextBlock _statusText = null!;
+
+    /// <summary>"Hotkeys ready" / "1 hotkey blocked", shown in the title bar left of the caption buttons.</summary>
+    private Border BuildStatusPill()
+    {
+        _statusDot = new Ellipse { Width = 8, Height = 8, VerticalAlignment = VerticalAlignment.Center, Classes = { "pulse" } };
+        _statusText = new TextBlock { FontWeight = FontWeight.SemiBold, FontSize = 11.5, VerticalAlignment = VerticalAlignment.Center };
+        var row = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 7, Children = { _statusDot, _statusText } };
+        _statusPill = new Border
+        {
+            CornerRadius = new CornerRadius(999), Padding = new Thickness(10, 3), BorderThickness = new Thickness(1),
+            VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 10, 0), Child = row,
+        };
+        return _statusPill;
     }
 
     private T Ctl<T>(string name) where T : Control => this.FindControl<T>(name)!;
@@ -92,11 +146,10 @@ public partial class SettingsWindow : Window
                                               + (conflicts.Count == 1 ? "it." : "them.");
 
         var bad = conflicts.Count > 0;
-        Ctl<TextBlock>("StatusText").Text = bad ? $"{conflicts.Count} hotkey{(conflicts.Count == 1 ? "" : "s")} blocked" : "Hotkeys ready";
-        var pill = Ctl<Border>("StatusPill");
-        pill.Background = new SolidColorBrush(Color.Parse(bad ? "#33260F" : "#0C2A1D"));
-        pill.BorderBrush = new SolidColorBrush(Color.Parse(bad ? "#5C4515" : "#146B44"));
-        Ctl<Ellipse>("StatusDot").Fill = new SolidColorBrush(Color.Parse(bad ? "#F5B14C" : "#19F58C"));
+        _statusText.Text = bad ? $"{conflicts.Count} hotkey{(conflicts.Count == 1 ? "" : "s")} blocked" : "Hotkeys ready";
+        _statusPill.Background = new SolidColorBrush(Color.Parse(bad ? "#33260F" : "#0C2A1D"));
+        _statusPill.BorderBrush = new SolidColorBrush(Color.Parse(bad ? "#5C4515" : "#146B44"));
+        _statusDot.Fill = new SolidColorBrush(Color.Parse(bad ? "#F5B14C" : "#19F58C"));
     }
 
     // ---- Hotkeys ---------------------------------------------------------------------------------------------------
